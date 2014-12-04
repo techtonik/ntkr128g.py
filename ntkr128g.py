@@ -43,15 +43,14 @@ original = system32('ntkrnlpa.exe')
 patched = system32('ntkr128g.exe')
 local = 'ntkr128g.exe'
 
-def copyntkr():
-  pass # [ ]
+def copykernel(original, local):
+  print('    ..copy ntkrnlpa.exe to ntkr128g.exe')
+  shutil.copy(original, local)
 
 print('[*] Checking if patch is present')
 if not os.path.exists(patched):
   # [ ] also check that OS is eligible
   print('    ntkr128g.exe is not found..')
-  print('[*] Copying ntkrnlpa.exe to ntkr128g.exe for patching..')
-  shutil.copy(original, local)
   needsaction += 1
 else:
   print('[*] Checking sizes')
@@ -60,11 +59,13 @@ else:
   if os.path.getsize(original) != os.path.getsize(patched):
     print('    Kernel 128Gb patch needs to be updated ')
     needsaction += 1
-  print('[*] Copying ntkrnlpa.exe to ntkr128g.exe for patching..')
-  shutil.copy(original, local)
+  else:
+    print('[*] Checking signature in ntkr128g.exe')
+    print('[ ] TODO')
 
-#print('[*] Checking signature in ntkr128g.exe')
-# [ ]
-
+if needsaction:
+  print('[*] Patching ntkr128g.exe..')
+  copykernel(original, local)
+  print('    ..TODO')
 
 sys.exit(needsaction)
