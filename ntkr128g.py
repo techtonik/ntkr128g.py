@@ -1,4 +1,4 @@
-# Windows 128Gb Memory Limit
+# Windows 4Gb memory limit patcher (unlocks access to 128Gb)
 # (thanks to Geoff Chappell for original research)
 # http://www.geoffchappell.com/notes/windows/license/memory.htm
 
