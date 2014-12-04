@@ -4,9 +4,14 @@
 
 # Check if patch for 128Gb Windows NT extensions is up to date
 #
-# [ ] check that size of ntkrnlpa.exe and ntkr128g.exe (patched) matches
-#   [ ] read File Version in .exe for reporting
-#   [ ] find if 
+# [x] check that size of ntkrnlpa.exe and ntkr128g.exe (patched) matches
+#   [x] read File Version in .exe for reporting
+#   [ ] find signature in new original file
+#     [ ] show previous offsets for known File Versions and new
+# [ ] find all occurences of signature
+#   [ ] fail if > 2
+# [ ] patch
+# [ ] report
 
 
 import ctypes    # using Windows API directly
