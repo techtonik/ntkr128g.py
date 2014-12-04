@@ -13,7 +13,6 @@
 # [ ] patch
 # [ ] report
 
-
 import os
 import sys
 import shutil
@@ -21,11 +20,20 @@ import shutil
 import ctypes    # using Windows API directly
 import ctypes.wintypes
 
-# signature to find
-signature1 = '7C 11 8B 45 FC 85 C0 74 0A'  # test for failure
-signature2 = '7C 10 8B 45 FC 85 C0 74 09'  # test for license
+PY3K = sys.version_info >= (3, 0)
 
-replacemnt =       'B8 00 00 02 00 90 90'  # patch
+def dehex(hextext):
+  if PY3K:
+    return bytes.fromhex(hextext)
+  else:
+    hextext = "".join(hextext.split())
+    return hextext.decode('hex')
+
+
+# signature to find
+signature1 = dehex('7C 11 8B 45 FC 85 C0 74 0A')  # test for failure
+signature2 = dehex('7C 10 8B 45 FC 85 C0 74 09')  # test for license
+replacemnt = dehex(      'B8 00 00 02 00 90 90')  # patch
 
 
 needsaction = 0
@@ -47,6 +55,11 @@ def copykernel(original, local):
   print('    ..copy ntkrnlpa.exe to ntkr128g.exe')
   shutil.copy(original, local)
 
+def offset(signature, local):
+  return open(local, 'rb').read().find(signature)
+
+
+# --- checking ---
 print('[*] Checking if patch is present')
 if not os.path.exists(patched):
   # [ ] also check that OS is eligible
@@ -61,11 +74,36 @@ else:
     needsaction += 1
   else:
     print('[*] Checking signature in ntkr128g.exe')
-    print('[ ] TODO')
+    sign1off = offset(signature1, local)
+    sign2off = offset(signature2, local)
+    # [ ] check that signature is present multiple times
+    if sign1off == -1 and sign2off == -1:
+      # [ ] explicit check for patched
+      print('    signatures are not found - may be already patched')
+   # [ ] check already patched
 
+# --- patching ---
 if needsaction:
   print('[*] Patching ntkr128g.exe..')
   copykernel(original, local)
-  print('    ..TODO')
+  sign1off = offset(signature1, local)
+  sign2off = offset(signature2, local)
+  if sign1off == -1 and sign2off == -1:
+    sys.exit("Error: Signatures not found. Aborting..")
+  print('[*] Checking signature offsets..')
+  print('    0x%08X, 0x%08X' % (sign1off, sign2off))
+  with open(local, 'r+b') as fw:
+    print('[*] Patching signature1..')
+    fw.seek(sign1off + 2)
+    fw.write(replacemnt)
+    print('[*] Patching signature2..')
+    fw.seek(sign2off + 2)
+    fw.write(replacemnt)
+    fw.close()
+  sign1off = offset(signature1, local)
+  sign2off = offset(signature2, local)
+  if sign1off == -1 and sign2off == -1:
+    print('Success.')
 
-sys.exit(needsaction)
+  print('\nMove the %s to %s and follow the instructions at' % (local, patched))
+  print('http://www.geoffchappell.com/notes/windows/license/memory.htm (Checksum and below)')
