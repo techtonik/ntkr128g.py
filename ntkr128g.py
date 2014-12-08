@@ -172,7 +172,14 @@ if needsaction:
   print('Done.')
 
   print('''
-Download WinSDKTools.
-Move the %s to %s and follow Digitan Signature instructions at
-http://www.geoffchappell.com/notes/windows/license/memory.htm'''
-% (local, patched))
+Download WinSDKTools and sign the binary:
+
+"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\makecert" -r -ss my -n "CN=Mega Testing Authority" 
+"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\signtool" sign -s my -n "Mega Testing Authority" ntkr128g.exe 
+"C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\CertMgr.Exe" -del -c -s my -n "Mega Testing Authority" 
+
+Look into http://www.geoffchappell.com/notes/windows/license/memory.htm
+if you need more details.
+
+
+Then move the %s to %s. ''' % (local, patched))
