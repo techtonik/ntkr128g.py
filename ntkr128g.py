@@ -171,5 +171,8 @@ if needsaction:
   print('      Header: 0x%08X, Actual: 0x%08X' % newsums)
   print('Done.')
 
-  print('\nMove the %s to %s and follow the instructions at' % (local, patched))
-  print('http://www.geoffchappell.com/notes/windows/license/memory.htm (Digital Signature)')
+  print('''
+Download WinSDKTools.
+Move the %s to %s and follow Digitan Signature instructions at
+http://www.geoffchappell.com/notes/windows/license/memory.htm'''
+% (local, patched))
