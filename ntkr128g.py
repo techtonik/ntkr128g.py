@@ -171,7 +171,7 @@ if needsaction:
   print('      Header: 0x%08X, Actual: 0x%08X' % newsums)
   print('Done.')
 
-  print('''
+  print(r'''
 Download WinSDKTools and sign the binary:
 
 "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\makecert" -r -ss my -n "CN=Mega Testing Authority" 
