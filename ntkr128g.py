@@ -178,6 +178,14 @@ Download WinSDKTools and sign the binary:
 "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\signtool" sign -s my -n "Mega Testing Authority" ntkr128g.exe 
 "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\CertMgr.Exe" -del -c -s my -n "Mega Testing Authority" 
 
+Add new entry in boot menu:
+
+bcdedit /copy {current} /d "Microsoft Windows 128 GB Memory" 
+
+bcdedit /set {guid} pae ForceEnable 
+bcdedit /set {guid} kernel ntkr128g.exe 
+bcdedit /set {guid} testsigning on 
+
 Look into http://www.geoffchappell.com/notes/windows/license/memory.htm
 if you need more details.
 
