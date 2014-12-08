@@ -51,8 +51,58 @@ original = system32('ntkrnlpa.exe')
 patched = system32('ntkr128g.exe')
 local = 'ntkr128g.exe'
 
+
+def checksum(filename):
+  PTSTR = ctypes.c_char_p
+  headersum  = ctypes.wintypes.DWORD()
+  checksum = ctypes.wintypes.DWORD()
+  ctypes.windll.imagehlp.MapFileAndCheckSumA(
+    PTSTR(filename), ctypes.byref(headersum), ctypes.byref(checksum))
+  return (headersum.value, checksum.value)
+
+
+def getdword(filename, offset):
+  bindata = open(filename, 'rb').read()
+
+  class Memory(ctypes.LittleEndianStructure):
+    _pack_ = 1
+    _fields_ = [
+      ('value', ctypes.wintypes.DWORD),
+    ]
+
+  memdword = Memory()
+  ctypes.memmove(ctypes.addressof(memdword), bindata[offset:], 4)
+  #print "dword: 0x%08X" % memdword.value
+  return memdword.value
+
+def setdword(filename, offset, value):
+  #memdword = Memory()
+  #memdword.value = 3333
+  #b = ctypes.c_uint32(0x99887766)
+  #print ctypes.string_at(ctypes.pointer(b), 4)
+  #print memdword.value
+  #print ctypes.string_at(ctypes.pointer(memdword.value), 4)
+  import struct
+  bytestr = struct.pack("<L", value)
+  with open(filename, 'r+b') as fw:
+    fw.seek(offset)
+    fw.write(bytestr)
+    fw.close()
+
+
+def checksumoffset(filename):
+  # -- calculate offset of checksum data by parsing PE header
+  ntheadoff = getdword(filename, 0x3c)  # lfanew
+  # 0x18 OptionalHeader, 0x40 there is CheckSum
+  offset = ntheadoff + 0x18 + 0x40
+  return offset
+  
+
+
+
 def copykernel(original, local):
   print('    ..copy ntkrnlpa.exe to ntkr128g.exe')
+  # [ ] preserve timestamp
   shutil.copy(original, local)
 
 def offset(signature, local):
@@ -103,7 +153,23 @@ if needsaction:
   sign1off = offset(signature1, local)
   sign2off = offset(signature2, local)
   if sign1off == -1 and sign2off == -1:
-    print('Success.')
+    print('    Patch Successful.')
+  else:
+    sys.exit('Error: Signatures are still there')
+
+  print('[*] Original/New checksums:')
+  newsums = checksum(local)
+  print('      Header: 0x%08X, Actual: 0x%08X' % checksum(original))
+  print('      Header: 0x%08X, Actual: 0x%08X' % newsums)
+  offset = checksumoffset(local)
+  csum = getdword(local, offset)
+  print('      Header: 0x%08X' % csum)
+
+  print('[*] Correcting checksum')
+  setdword(local, offset, newsums[1])
+  newsums = checksum(local)
+  print('      Header: 0x%08X, Actual: 0x%08X' % newsums)
+  print('Done.')
 
   print('\nMove the %s to %s and follow the instructions at' % (local, patched))
   print('http://www.geoffchappell.com/notes/windows/license/memory.htm (Checksum and below)')
