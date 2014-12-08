@@ -172,4 +172,4 @@ if needsaction:
   print('Done.')
 
   print('\nMove the %s to %s and follow the instructions at' % (local, patched))
-  print('http://www.geoffchappell.com/notes/windows/license/memory.htm (Checksum and below)')
+  print('http://www.geoffchappell.com/notes/windows/license/memory.htm (Digital Signature)')
